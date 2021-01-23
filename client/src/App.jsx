@@ -2,8 +2,9 @@ import React, { Fragment, useLayoutEffect } from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loadUser, setLoadingToFalse } from "./redux/actions/userActions";
-import { clearError } from "./redux/actions/errorActions";
 import setAuthToken from "./utils/setAuthToken";
+import LoadingSpinner from "./components/UI-components/LoadingSpinner";
+import ErrorModal from "./components/UI-components/ErrorModal";
 
 import "./App.scss";
 
@@ -14,9 +15,8 @@ import Login from "./pages/users/Login";
 import Registration from "./pages/users/Registration";
 
 const App = () => {
-  const userState = useSelector((state) => state.user);
-  const error = useSelector((state) => state.error);
   const dispatch = useDispatch();
+  const isLoading = useSelector((state) => state.user.isLoading);
 
   useLayoutEffect(() => {
     const token = JSON.parse(localStorage.getItem("token"));
@@ -29,24 +29,19 @@ const App = () => {
     }
   }, [dispatch]);
 
-  if (error) {
-    alert(error.message);
-    dispatch(clearError());
-  }
-
-  if (userState.isLoading) {
-    return <div> Loading </div>;
-  }
-
   return (
     <Fragment>
       <Router>
+        <ErrorModal />
+        {isLoading && <LoadingSpinner asOverlay />}
         <Navbar />
-        <Switch>
-          <Route exact path="/register" component={Registration} />
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/" component={Home} />
-        </Switch>
+        <main className="main-content">
+          <Switch>
+            <Route exact path="/register" component={Registration} />
+            <Route exact path="/login" component={Login} />
+            <Route exact path="/" component={Home} />
+          </Switch>
+        </main>
       </Router>
     </Fragment>
   );
